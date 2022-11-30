@@ -17,7 +17,12 @@ contract ProductManagement {
     }
 
     mapping(bytes32 => Part) public parts;
+    mapping(uint => bytes32) public parts_list;
     mapping(bytes32 => Product) public products;
+    mapping(uint => bytes32) public products_list;
+
+    uint public parts_cnt = 0;
+    uint public products_cnt = 0;
 
     constructor() public {
     }
@@ -51,15 +56,20 @@ contract ProductManagement {
         return keccak256(b_full);
     }
 
-    function buildPart(string memory serial_number, string memory part_type, string memory creation_date) public returns (bytes32){
+
+    event parthash(bytes32 part_hash);
+
+    function buildPart(string memory serial_number, string memory part_type, string memory creation_date) public {
         //Create hash for data and check if it exists. If it doesn't, create the part and return the ID to the user
         bytes32 part_hash = concatenateInfoAndHash(msg.sender, serial_number, part_type, creation_date);
-        
+        emit parthash(part_hash);
+
         require(parts[part_hash].manufacturer == address(0), "Part ID already used");
 
         Part memory new_part = Part(msg.sender, serial_number, part_type, creation_date);
         parts[part_hash] = new_part;
-        return part_hash;
+        parts_list[parts_cnt] = part_hash;
+        parts_cnt +=1;
     }
 
     function buildProduct(string memory serial_number, string memory product_type, string memory creation_date, bytes32[6] memory part_array) public returns (bytes32){
@@ -83,5 +93,19 @@ contract ProductManagement {
         //The automatic getter does not return arrays, so lets create a function for that
         require(products[product_hash].manufacturer != address(0), "Product inexistent");
         return products[product_hash].parts;
+    }
+
+    // function getPart(bytes32 part_hash) public returns (address, string , string , string ){
+    //     address add = parts[part_hash].manufacturer;
+    //     string serial = parts[part_hash].serial_number;
+    //     string types = parts[part_hash].product_type;
+    //     string date = parts[part_hash].creation_date;
+
+    //     return add,serial,types,date
+    // }
+
+     function getPart(bytes32 parthasha) public view returns(string memory){
+        return parts[parthasha].part_type;
+
     }
 }
