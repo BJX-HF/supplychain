@@ -1,2 +1,3 @@
 # supplychain
-123
+Supplychain base on ETH and hyperledger fabric
+
